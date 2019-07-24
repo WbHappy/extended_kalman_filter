@@ -36,6 +36,7 @@ void KalmanFilter::Update(const VectorXd &z) {
    * TODO: update the state by using Kalman Filter equations
    */
   VectorXd y = z -  H_ * x_;
+
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
@@ -52,5 +53,33 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
-  // MatrixXd Hj = CalculateJacobian(z);
+  VectorXd h = VectorXd(3);
+  h(0) = sqrt( x_(0) *  x_(0) + x_(1) * x_(1) );
+  h(1) = atan2( x_(1) , x_(0) );
+  h(2) = (x_(0) * x_(2) + x_(1) * x_(3)) / h(0);
+  
+  VectorXd y = z - h;
+
+  //  You'll need to make sure to normalize ϕ in the y vector so that its angle is between 
+  // −π and π; in other words, add or subtract 2π from ϕ until it is between −π and π.
+
+  while ( y(1) > M_PI || y(1) < -M_PI ) {
+    if ( y(1) > M_PI ) {
+      y(1) -= M_PI;
+    } else {
+      y(1) += M_PI;
+    }
+  }
+
+  MatrixXd Ht = H_.transpose();
+  MatrixXd S = H_ * P_ * Ht + R_;
+  MatrixXd Si = S.inverse();
+  MatrixXd K = P_ * Ht * Si;
+
+  //new estimate
+  x_ = x_ + (K * y);
+  long x_size = x_.size();
+  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  P_ = (I - K * H_) * P_;  
+
 }
