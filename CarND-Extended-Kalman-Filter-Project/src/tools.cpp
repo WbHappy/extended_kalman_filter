@@ -46,27 +46,33 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 	MatrixXd Hj(3,4);
 	
 	// recover state parameters
-	float px = x_state(0);
-	float py = x_state(1);
-	float vx = x_state(2);
-	float vy = x_state(3);
+	double px = x_state(0);
+	double py = x_state(1);
+	double vx = x_state(2);
+	double vy = x_state(3);
 
 	// TODO: YOUR CODE HERE 
-	float sum_px_py = pow(px,2) + pow(py,2);
+	double sum_px_py = pow(px,2) + pow(py,2);
 	// check division by zero
-	if (fabs(sum_px_py) < 0.0001){
-		cout << "ERROR -Division by Zero !" << endl;
-	  	return Hj;
+  //check division by zero
+  	if(fabs(sum_px_py) < 0.0001){
+	    cout << "CalculateJacobian () - Error - Division by Zero" << endl;
+	    return Hj;
 	}
+
+	  Hj <<  (px/sqrt(sum_px_py)), (py/sqrt(sum_px_py)), 0, 0,
+        -(py/sum_px_py), (px/sum_px_py), 0, 0,
+          py*(vx*py - vy*px)/(sum_px_py*sqrt(sum_px_py)), px*(px*vy - py*vx)/(sum_px_py*sqrt(sum_px_py)), px/sqrt(sum_px_py), py/sqrt(sum_px_py);
+          
 	// compute the Jacobian matrix
-	Hj(0, 0) = px / sqrt(sum_px_py);
-	Hj(0, 1) = py / sqrt(sum_px_py);
-	Hj(1, 0) = -py / sum_px_py ;
-	Hj(1, 1) = px / sum_px_py;    
-	Hj(2, 0) = py * (vx*py-vy*px) / pow(sum_px_py, 3/2);
-	Hj(2, 1) = px * (-vx*py+vy*px) / pow(sum_px_py, 3/2);       
-	Hj(2, 2) = px / sqrt(sum_px_py);  
-	Hj(2, 3) = py / sqrt(sum_px_py); 
+	// Hj(0, 0) = px / sqrt(sum_px_py);
+	// Hj(0, 1) = py / sqrt(sum_px_py);
+	// Hj(1, 0) = -py / sum_px_py ;
+	// Hj(1, 1) = px / sum_px_py;    
+	// Hj(2, 0) = py * (vx*py-vy*px) / pow(sum_px_py, 3/2);
+	// Hj(2, 1) = px * (-vx*py+vy*px) / pow(sum_px_py, 3/2);       
+	// Hj(2, 2) = px / sqrt(sum_px_py);  
+	// Hj(2, 3) = py / sqrt(sum_px_py); 
 
 	return Hj;
 }
